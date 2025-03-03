@@ -236,19 +236,19 @@ export class AnalysisService {
       // Prix (10€ à 500€)
       if (row.Prix < 0) {
         anomalies.prix.push({
-          ligne: index + 1,
+          ligne: index + 2,
           valeur: row.Prix,
           raison: 'Prix négatif',
         });
       } else if (row.Prix < 10) {
         anomalies.prix.push({
-          ligne: index + 1,
+          ligne: index + 2,
           valeur: row.Prix,
           raison: 'Prix inférieur à 10€',
         });
       } else if (row.Prix > 500) {
         anomalies.prix.push({
-          ligne: index + 1,
+          ligne: index + 2,
           valeur: row.Prix,
           raison: 'Prix supérieur à 500€',
         });
@@ -258,34 +258,34 @@ export class AnalysisService {
       const qte = row.Quantité;
       if (qte < 0) {
         anomalies.quantite.push({
-          ligne: index + 1,
+          ligne: index + 2,
           valeur: qte,
           raison: 'Quantité négative',
         });
       } else if (qte === 0) {
         anomalies.quantite.push({
-          ligne: index + 1,
+          ligne: index + 2,
           valeur: qte,
           raison: 'Quantité nulle',
         });
-      } else if (qte > 1000) {
+      } else if (qte >= 1000) {
         anomalies.quantite.push({
-          ligne: index + 1,
+          ligne: index + 2,
           valeur: qte,
-          raison: 'Quantité excessivement haute (>1000)',
+          raison: 'Quantité excessivement haute (>=1000)',
         });
       }
 
       // Notes (1.0 à 5.0)
       if (row.Note_Client < 1) {
         anomalies.note.push({
-          ligne: index + 1,
+          ligne: index + 2,
           valeur: row.Note_Client,
           raison: 'Note inférieure à 1',
         });
       } else if (row.Note_Client > 5) {
         anomalies.note.push({
-          ligne: index + 1,
+          ligne: index + 2,
           valeur: row.Note_Client,
           raison: 'Note supérieure à 5',
         });

@@ -1,4 +1,3 @@
-// notification.service.ts
 import { Injectable } from '@nestjs/common';
 import {
   QueueServiceClient,
@@ -29,32 +28,45 @@ export class NotificationService {
   async sendNotification(analysisResult: any) {
     const queueClient = this.queueServiceClient.getQueueClient(this.queueName);
 
-    // Créer un message de notification
-    const notification = {
-      type: 'analysis_completed',
-      fileName: analysisResult.fileName,
-      timestamp: new Date().toISOString(),
-      summary: {
-        totalRecords: analysisResult.results.statistics.totalRecords,
-        totalAnomalies: analysisResult.results.anomalies.totalAnomalies,
-        avgPrice: analysisResult.results.statistics.prices.average,
-        avgQuantity: analysisResult.results.statistics.quantities.average,
-        avgRating: analysisResult.results.statistics.ratings.average,
-      },
-    };
+    try {
+      // Vérification et récupération sécurisée des données
+      const statistics = analysisResult.results?.statistics || {};
+      const anomalies = analysisResult.results?.anomalies || {};
 
-    // Encoder en base64 comme requis par Azure Queue Storage
-    const message = Buffer.from(JSON.stringify(notification)).toString(
-      'base64',
-    );
+      const notification = {
+        type: 'analysis_completed',
+        fileName: analysisResult.fileName,
+        timestamp: new Date().toISOString(),
+        summary: {
+          totalRecords: statistics.totalRecords || 0,
+          totalAnomalies:
+            (anomalies.prix?.length || 0) +
+            (anomalies.quantite?.length || 0) +
+            (anomalies.note?.length || 0),
+          avgPrice: statistics.prix?.moyenne || 0,
+          avgQuantity: statistics.quantite?.moyenne || 0,
+          avgRating: statistics.note?.moyenne || 0,
+        },
+      };
 
-    // Envoyer à la file d'attente
-    await queueClient.sendMessage(message);
+      // Encoder en base64 comme requis par Azure Queue Storage
+      const message = Buffer.from(JSON.stringify(notification)).toString(
+        'base64',
+      );
 
-    return {
-      success: true,
-      message: 'Notification sent successfully',
-      notificationDetails: notification,
-    };
+      // Envoyer à la file d'attente
+      await queueClient.sendMessage(message);
+
+      return {
+        success: true,
+        message: 'Notification sent successfully',
+        notificationDetails: notification,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: `Error sending notification: ${error.message}`,
+      };
+    }
   }
 }
